@@ -52,7 +52,7 @@ export async function updateTask(task: Task, stateMachine: StateMachine) {
     }
     // expired?
     const now = Date.now()
-    if (now < task.startedAt + currentAction.timeout) {
+    if (now > task.startedAt + currentAction.timeout) {
         console.log(`Task(${task.name}): ${task.state} retrying`)
         // expired; retry!
         task.startedAt = now

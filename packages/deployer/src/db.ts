@@ -14,7 +14,7 @@ function open(): object {
 }
 
 function save(db: object) {
-    const json = JSON.stringify(db)
+    const json = JSON.stringify(db, undefined, 2)
     fs.writeFileSync(FILE, json, {encoding: 'utf8'})
 } 
 

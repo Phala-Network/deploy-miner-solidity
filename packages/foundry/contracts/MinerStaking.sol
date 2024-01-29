@@ -111,7 +111,8 @@ contract MinerManagement is Ownable {
         require(rewardBalance[minerId] > reward, "Insufficient reward");
         IERC20(localStakingInfo.rewardToken).safeTransfer(msg.sender, reward);
 
-        // Update staking info
+        // Update reward info
+        pendingReward[minerId][msg.sender] = 0;
         rewardBalance[minerId] -= reward;
 
         // TODO: remove from depositor list

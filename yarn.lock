@@ -1189,6 +1189,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@openzeppelin/contracts@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "@openzeppelin/contracts@npm:5.0.1"
+  checksum: bc056d358a672f0d43ff5a372b5b65c6d3e9e49478f70bc00a5ad06ce9107400e8e8b8d94cf85dffca00b303ee8d15ac8def55d320ea54386dc81d6b98ddfabc
+  languageName: node
+  linkType: hard
+
 "@parcel/watcher-android-arm64@npm:2.4.0":
   version: 2.4.0
   resolution: "@parcel/watcher-android-arm64@npm:2.4.0"
@@ -1469,6 +1476,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@se-2/foundry@workspace:packages/foundry"
   dependencies:
+    "@openzeppelin/contracts": ^5.0.1
     "@types/prettier": 2
     "@types/qrcode": 1
     dotenv: ~16.3.1
@@ -3924,9 +3932,9 @@ __metadata:
   linkType: hard
 
 "crossws@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "crossws@npm:0.1.0"
-  checksum: 1a287499effa14fde86644b79927160a41117cc798f0a948864e2813e3080907e21e6dd3583a2d5d2123f5b54b59f4c19686badaccc65910b3bb6aa57b5a0f42
+  version: 0.1.1
+  resolution: "crossws@npm:0.1.1"
+  checksum: 4cd8eadb497d852998b770d54a10779ba9e0c38c823d141c35040c7a7afc7a6fcd274ce82a8614e992e3f71cb5e41c71a01ee0923ab6e1bec215842404555d7d
   languageName: node
   linkType: hard
 
@@ -8758,7 +8766,6 @@ __metadata:
   dependencies:
     husky: ~8.0.3
     lint-staged: ~13.2.2
-    ts-node: ^10.9.2
   languageName: unknown
   linkType: soft
 

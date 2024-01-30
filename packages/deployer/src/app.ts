@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import * as db from './db'
 import { sleep, logger } from './utils'
 import { StateMachine, Task, newTask, updateTask } from './states'
@@ -6,7 +7,7 @@ import * as PC from './chain/pc'
 import * as EVM from './chain/evm'
 
 type Context = {
-    mid: string,
+    mid: `0x${string}`,
     expiration: number,
 }
 

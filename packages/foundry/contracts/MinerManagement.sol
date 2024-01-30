@@ -107,6 +107,14 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
         return miners[minerId].owner;
     }
 
+    function getAllMiners() public view returns (MinerInfo[] memory) {
+        MinerInfo[] memory result = new MinerInfo[](totalMiners);
+        for (uint256 i = 0; i < totalMiners; ++i) {
+            result[i] = miners[bytes32(i)];
+        }
+        return result;
+    }
+
     /**
      * Function that allows the contract to receive ETH
      */

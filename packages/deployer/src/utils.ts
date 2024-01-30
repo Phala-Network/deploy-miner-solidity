@@ -10,16 +10,16 @@ function logPrefix(): string {
 }
 
 export const logger = {
-    warn(...args) {
+    warn(...args: any[]) {
         console.warn(logPrefix(), ...args)
     },
-    log(...args) {
+    log(...args: any[]) {
         console.log(logPrefix(), ...args)
     },
-    error(...args) {
+    error(...args: any[]) {
         console.error(logPrefix(), ...args)
     },
-    debug(...args) {
+    debug(...args: any[]) {
         console.error(logPrefix(), ...args)
     },
 }

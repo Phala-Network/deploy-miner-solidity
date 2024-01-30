@@ -32,6 +32,23 @@ contract DeployScript is ScaffoldETHDeploy {
         console.logString(string.concat("MinerStaking deployed at: ", vm.toString(address(minerStaking))));
         vm.stopBroadcast();
 
+        deployments.push(ScaffoldETHDeploy.Deployment({
+            name: "USDC",
+            addr: address(usdc)
+        }));
+        deployments.push(ScaffoldETHDeploy.Deployment({
+            name: "TestToken",
+            addr: address(testToken)
+        }));
+        deployments.push(ScaffoldETHDeploy.Deployment({
+            name: "MinerManagement",
+            addr: address(minerManagement)
+        }));
+        deployments.push(ScaffoldETHDeploy.Deployment({
+            name: "MinerStaking",
+            addr: address(minerStaking)
+        }));
+
         /**
          * This function generates the file containing the contracts Abi definitions.
          * These definitions are used to derive the types needed in the custom scaffold-eth hooks, for example.

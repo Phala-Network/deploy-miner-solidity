@@ -26,27 +26,25 @@ contract MinerManagementTest is Test {
     function setUp() public {
         usdc = new Token_ERC20("USD Coin", "USDC", 6);
         usdc.mint(DEFAULT_SENDER, 1000000000);
-        // Pay 100 USDC for a worker
-        minerManagement = new MinerManagement(DEFAULT_SENDER, address(usdc), 100000000);
+        minerManagement = new MinerManagement(DEFAULT_SENDER, address(usdc));
     }
 
     function testPayMiningWithUSDC() public {
         vm.prank(address(DEFAULT_SENDER));
-        usdc.approve(address(minerManagement), 100000000);
+        usdc.approve(address(minerManagement), 5000000);
         vm.prank(address(DEFAULT_SENDER));
-        bytes32 minerId = minerManagement.payForMining();
+        // Buy 24 hours
+        bytes32 minerId = minerManagement.payForMining(5000000);
 
-        require(IERC20(address(usdc)).balanceOf(address(minerManagement)) == 100000000, "Failed to buy worker");
+        require(IERC20(address(usdc)).balanceOf(address(minerManagement)) == 5000000, "Failed to buy worker");
         require(minerManagement.hasPaied(minerId), "Miner should be paied");
 
         vm.prank(address(DEFAULT_SENDER));
-        minerManagement.reportMinerOnline(minerId);
         require(minerManagement.isActived(minerId), "Miner should be actived");
         require(!minerManagement.hasExpired(minerId), "Miner should not expired");
 
-        // block.timestamp start with 1, and DEFAULT_EXPIRATION_DURATION is 60, so 62 should
-        // be the expire time
-        vm.warp(62);
+        // block.timestamp start with 1, increase 24 hours
+        vm.warp(1 + 24 * 60 * 60);
         require(minerManagement.hasExpired(minerId), "Miner should expired");
     }
 }

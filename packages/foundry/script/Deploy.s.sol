@@ -24,30 +24,20 @@ contract DeployScript is ScaffoldETHDeploy {
         ERC20 testToken = new ERC20("Test Token", "TT", 18);
         console.logString(string.concat("TT (Test Token) deployed at: ", vm.toString(address(testToken))));
         testToken.mint(vm.addr(deployerPrivateKey), 10000000000000000000000);
-        console.logString(string.concat("Mint 10000000000000000000000 TT to addr: ", vm.toString(vm.addr(deployerPrivateKey))));
+        console.logString(
+            string.concat("Mint 10000000000000000000000 TT to addr: ", vm.toString(vm.addr(deployerPrivateKey)))
+        );
 
-        MinerManagement minerManagement = new MinerManagement(vm.addr(deployerPrivateKey), address(usdc), 100000000);
+        MinerManagement minerManagement = new MinerManagement(vm.addr(deployerPrivateKey), address(usdc));
         console.logString(string.concat("MinerManagement deployed at: ", vm.toString(address(minerManagement))));
         MinerStaking minerStaking = new MinerStaking(address(minerManagement));
         console.logString(string.concat("MinerStaking deployed at: ", vm.toString(address(minerStaking))));
         vm.stopBroadcast();
 
-        deployments.push(ScaffoldETHDeploy.Deployment({
-            name: "USDC",
-            addr: address(usdc)
-        }));
-        deployments.push(ScaffoldETHDeploy.Deployment({
-            name: "TestToken",
-            addr: address(testToken)
-        }));
-        deployments.push(ScaffoldETHDeploy.Deployment({
-            name: "MinerManagement",
-            addr: address(minerManagement)
-        }));
-        deployments.push(ScaffoldETHDeploy.Deployment({
-            name: "MinerStaking",
-            addr: address(minerStaking)
-        }));
+        deployments.push(ScaffoldETHDeploy.Deployment({name: "USDC", addr: address(usdc)}));
+        deployments.push(ScaffoldETHDeploy.Deployment({name: "TestToken", addr: address(testToken)}));
+        deployments.push(ScaffoldETHDeploy.Deployment({name: "MinerManagement", addr: address(minerManagement)}));
+        deployments.push(ScaffoldETHDeploy.Deployment({name: "MinerStaking", addr: address(minerStaking)}));
 
         /**
          * This function generates the file containing the contracts Abi definitions.

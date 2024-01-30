@@ -49,7 +49,7 @@ contract MinerStakingTest is Test {
         assertEq(testToken.balanceOf(address(staker2)), 10000000000000000000000);
 
         // Config to pay 100 USDC for a worker
-        minerManagement = new MinerManagement(deployer, address(usdc), 100000000);
+        minerManagement = new MinerManagement(deployer, address(usdc));
         minerStaking = new MinerStaking(address(minerManagement));
 
         stakingInfo = MinerStaking.StakingInfo({
@@ -68,30 +68,14 @@ contract MinerStakingTest is Test {
         // Should failed if hasn't brought worker
         vm.expectRevert("Not miner owner");
         vm.prank(address(minerOwner));
-        minerStaking.createStaking(
-            bytes32(0),
-            stakingInfo,
-            10000000000000000000000
-        );
+        minerStaking.createStaking(bytes32(0), stakingInfo, 10000000000000000000000);
 
         // Buy worker
         vm.prank(address(minerOwner));
-        usdc.approve(address(minerManagement), 100000000);
+        usdc.approve(address(minerManagement), 5000000);
         vm.prank(address(minerOwner));
-        bytes32 minerId = minerManagement.payForMining();
+        bytes32 minerId = minerManagement.payForMining(5000000);
         require(minerManagement.hasPaied(minerId), "Miner should be paied");
-
-        // Should failed if worker hasn't online
-        vm.expectRevert("Worker has not online");
-        vm.prank(address(minerOwner));
-        minerStaking.createStaking(
-            minerId,
-            stakingInfo,
-            10000000000000000000000
-        );
-
-        vm.prank(address(deployer));
-        minerManagement.reportMinerOnline(minerId);
         require(minerManagement.isActived(minerId), "Miner should be actived");
         require(!minerManagement.hasExpired(minerId), "Miner should not expired");
 
@@ -99,11 +83,7 @@ contract MinerStakingTest is Test {
         vm.prank(address(minerOwner));
         testToken.approve(address(minerStaking), 10000000000000000000000);
         vm.prank(address(minerOwner));
-        minerStaking.createStaking(
-            minerId,
-            stakingInfo,
-            10000000000000000000000
-        );
+        minerStaking.createStaking(minerId, stakingInfo, 10000000000000000000000);
 
         // Staker1 deposit 1 TT
         vm.prank(address(staker1));

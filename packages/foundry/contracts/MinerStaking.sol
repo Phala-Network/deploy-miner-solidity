@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/utils/math/Math.sol";
 
 import "./IMinerManagementInspect.sol";
 
-contract MinerManagement is Ownable {
+contract MinerStaking is Ownable {
     using Math for uint256;
     using SafeERC20 for IERC20;
 
@@ -44,7 +44,7 @@ contract MinerManagement is Ownable {
     }
 
     modifier onlyMinerOwner(bytes32 minerId) {
-        require(_msgSender() == IMinerManagementInspect(minerManagement).minerOwner(minerId), "Not deployer");
+        require(_msgSender() == IMinerManagementInspect(minerManagement).minerOwner(minerId), "Not miner owner");
         _;
     }
 
@@ -118,13 +118,25 @@ contract MinerManagement is Ownable {
         // TODO: remove from depositor list
     }
 
-    // Calculate reward based on share
+    // Calculate pending reward that depositor current has
     function getReward(bytes32 minerId, address depositor) public view returns (uint256) {
-        return pendingReward[minerId][depositor];
+        StakingInfo memory localStakingInfo = stakingInfo[minerId];
+
+        uint256 totalNonSavedReward = localStakingInfo.reward * (block.number - localStakingInfo.lastUpdateBlock);
+        // Saved pending reward + non-saved pending reward
+        return pendingReward[minerId][depositor] + (totalNonSavedReward / depositorList[minerId].length);
+    }
+
+    function getDepositors(bytes32 minerId) public view returns (address[] memory) {
+        return depositorList[minerId];
     }
 
     // Update reward, use for look for demo purpose only
     function _update(bytes32 minerId) internal {
+        if (depositorList[minerId].length == 0) {
+            return;
+        }
+
         StakingInfo memory localStakingInfo = stakingInfo[minerId];
 
         uint256 totalReward = localStakingInfo.reward * (block.number - localStakingInfo.lastUpdateBlock);

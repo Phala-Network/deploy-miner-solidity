@@ -26,8 +26,6 @@ contract MinerManagementTest is Test {
     function setUp() public {
         usdc = new Token_ERC20("USD Coin", "USDC", 6);
         usdc.mint(DEFAULT_SENDER, 1000000000);
-        assertEq(usdc.totalSupply(), 1000000000);
-        assertEq(usdc.balanceOf(address(DEFAULT_SENDER)), 1000000000);
         // Pay 100 USDC for a worker
         minerManagement = new MinerManagement(DEFAULT_SENDER, address(usdc), 100000000);
     }

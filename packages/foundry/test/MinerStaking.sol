@@ -85,7 +85,7 @@ contract MinerStakingTest is Test {
         vm.expectRevert("Worker has not online");
         vm.prank(address(minerOwner));
         minerStaking.createStaking(
-            bytes32(0),
+            minerId,
             stakingInfo,
             10000000000000000000000
         );
@@ -100,7 +100,7 @@ contract MinerStakingTest is Test {
         testToken.approve(address(minerStaking), 10000000000000000000000);
         vm.prank(address(minerOwner));
         minerStaking.createStaking(
-            bytes32(0),
+            minerId,
             stakingInfo,
             10000000000000000000000
         );

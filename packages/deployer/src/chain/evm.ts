@@ -6,7 +6,7 @@ import { foundry } from 'viem/chains'
 // import { publicClient, walletClient } from './client'
 
 const KEY = <`0x${string}`> process.env.EVM_PRIVKEY || '0x01'
-const CONTRACT = <`0x${string}`> process.env.CONTRACT || '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2'
+const CONTRACT = <`0x${string}`> process.env.EVM_CONTRACT || '0xFBA3912Ca04dd458c843e2EE08967fC04f3579c2'
 
 const abi = parseAbi([
     'struct MinerInfo { address owner; uint256 expiration; uint256 state; }',

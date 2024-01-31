@@ -815,11 +815,6 @@ const deployedContracts = {
               name: "_feeToken",
               type: "address",
             },
-            {
-              internalType: "uint256",
-              name: "_feeAmount",
-              type: "uint256",
-            },
           ],
           stateMutability: "nonpayable",
           type: "constructor",
@@ -925,19 +920,6 @@ const deployedContracts = {
         },
         {
           inputs: [],
-          name: "feeAmount",
-          outputs: [
-            {
-              internalType: "uint256",
-              name: "",
-              type: "uint256",
-            },
-          ],
-          stateMutability: "view",
-          type: "function",
-        },
-        {
-          inputs: [],
           name: "feeToken",
           outputs: [
             {
@@ -969,6 +951,11 @@ const deployedContracts = {
                   internalType: "enum MinerManagement.MinerState",
                   name: "state",
                   type: "uint8",
+                },
+                {
+                  internalType: "string",
+                  name: "uri",
+                  type: "string",
                 },
               ],
               internalType: "struct MinerManagement.MinerInfo[]",
@@ -1093,6 +1080,11 @@ const deployedContracts = {
               name: "state",
               type: "uint8",
             },
+            {
+              internalType: "string",
+              name: "uri",
+              type: "string",
+            },
           ],
           stateMutability: "view",
           type: "function",
@@ -1111,7 +1103,13 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [],
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "amount",
+              type: "uint256",
+            },
+          ],
           name: "payForMining",
           outputs: [
             {
@@ -1138,7 +1136,7 @@ const deployedContracts = {
               type: "bytes32",
             },
           ],
-          name: "reportMinerOffline",
+          name: "reportExpired",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",
@@ -1150,8 +1148,13 @@ const deployedContracts = {
               name: "minerId",
               type: "bytes32",
             },
+            {
+              internalType: "string",
+              name: "uri",
+              type: "string",
+            },
           ],
-          name: "reportMinerOnline",
+          name: "reportOnline",
           outputs: [],
           stateMutability: "nonpayable",
           type: "function",

@@ -9,6 +9,7 @@ function open(): object {
     } catch (err) {
         console.error(err)
         console.log('creating new')
+        save(db)
     }
     return db
 }

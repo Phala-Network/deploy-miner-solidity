@@ -11,7 +11,7 @@ cp .env_example .env
 yarn
 ```
 
-## Run
+## Run Deployer
 
 Ensure you have:
 1. Started foundry testnet
@@ -20,4 +20,13 @@ Ensure you have:
 
 ```bash
 yarn dev
+```
+
+## Run Encryption Demo
+
+Ensure you have:
+1. Set the `.env` variables accordingly
+
+```bash
+yarn demo
 ```

@@ -16,6 +16,8 @@ contract MinerStaking is Ownable {
     using Math for uint256;
     using SafeERC20 for IERC20;
 
+    uint256 MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+
     struct StakingInfo {
         // Owner of the miner, e.g. owner of the staking event
         address owner;
@@ -75,18 +77,28 @@ contract MinerStaking is Ownable {
     }
 
     // Miner deployer pause staking when miner offline
-    function pauseStaking(bytes32 minerId) external onlyMinerDeployer {}
+    function pauseStaking(bytes32 minerId) external onlyMinerDeployer {
+        _update(minerId);
+        StakingInfo memory localStakingInfo = stakingInfo[minerId];
+        localStakingInfo.lastUpdateBlock = MAX_UINT256;
+        stakingInfo[minerId] = localStakingInfo;
+    }
 
     // Miner deployer unpause staking when miner back to online
-    function unpauseStaking(bytes32 minerId) external onlyMinerDeployer {}
+    function unpauseStaking(bytes32 minerId) external onlyMinerDeployer {
+        StakingInfo memory localStakingInfo = stakingInfo[minerId];
+        localStakingInfo.lastUpdateBlock = block.number;
+        stakingInfo[minerId] = localStakingInfo;
+    }
 
     // User deposit fund
     function deposit(bytes32 minerId) external {
+        StakingInfo memory localStakingInfo = stakingInfo[minerId];
+        require(block.number >= localStakingInfo.lastUpdateBlock, "Can not deposit");
         require(!depositRecord[minerId][msg.sender], "Already deposited");
 
         _update(minerId);
 
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
         IERC20(localStakingInfo.stakingToken).safeTransferFrom(msg.sender, address(this), localStakingInfo.ticket);
         depositRecord[minerId][msg.sender] = true;
 
@@ -133,11 +145,10 @@ contract MinerStaking is Ownable {
 
     // Update reward, use for look for demo purpose only
     function _update(bytes32 minerId) internal {
-        if (depositorList[minerId].length == 0) {
+        StakingInfo memory localStakingInfo = stakingInfo[minerId];
+        if (depositorList[minerId].length == 0 || block.number <= localStakingInfo.lastUpdateBlock) {
             return;
         }
-
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
 
         uint256 totalReward = localStakingInfo.reward * (block.number - localStakingInfo.lastUpdateBlock);
         for (uint256 i = 0; i < depositorList[minerId].length; i++) {

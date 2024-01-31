@@ -9,5 +9,5 @@ export async function deploy(mid: string, expiration: number): Promise<void> {
 export async function checkMinerDeployed(mid: string): Promise<boolean> {
     logger.log(`checkMinerDeployed(${mid})`);
     // TODO: await contract.getDeployment(mid).isOk
-    return false
+    return true
 }

@@ -1,7 +1,7 @@
 import { parseAbi, getContract } from 'viem'
 import { createPublicClient, createWalletClient, http, numberToHex } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
-import { localhost, mainnet } from 'viem/chains'
+import { foundry } from 'viem/chains'
  
 // import { publicClient, walletClient } from './client'
 
@@ -18,12 +18,12 @@ const abi = parseAbi([
 
 const account = privateKeyToAccount(KEY)
 const publicClient = createPublicClient({
-    chain: localhost,
+    chain: foundry,
     transport: http(),
 })
 const walletClient = createWalletClient({
     account,
-    chain: localhost,
+    chain: foundry,
     transport: http()
 })
 

@@ -31,7 +31,7 @@ export async function connect(): Promise<void> {
     const keyring = new Keyring({ type: 'sr25519', ss58Format: 30 });
     const key = keyring.addFromSeed(hexToU8a(KEY));
     const provider = await KeyringPairProvider.create(api, key)
-    console.log('Phala Address:', provider.address)
+    logger.log('Phala Address:', provider.address)
     // Create contract clients
     client = await getClient({ transport: 'wss://poc6.phala.network/ws' })
     contract = await getContract({
@@ -46,8 +46,19 @@ export async function deploy(owner: `0x${string}`, mid: string, expiration: numb
     logger.log(`deploy(${mid}, ${expiration})`)
     const hexDeploymentId = stringToHex(mid)
     const rawAddress = u8aToHex(u8aConcat(hexToU8a(owner), stringToU8a('@evm_address')))
+
     // @ts-ignore
-    await contract.exec.createUser({ args: [rawAddress, hexDeploymentId, expiration] })
+    const { output } = await contract.q.getWorkers({ args: [rawAddress] })
+    logger.log('output', output.toJSON())
+    // assert(output.isOk)
+    if (output.asOk.isErr && output.asOk.asErr.toString() == 'UserNotExists') {
+        // New deployment
+        // @ts-ignore
+        await contract.exec.createUser({ args: [rawAddress, hexDeploymentId, expiration] })
+    } else {
+        // @ts-ignore
+        await contract.exec.appendWorker({ args: [rawAddress, hexDeploymentId, expiration] })
+    }
 }
 
 export async function checkMinerDeployed(mid: string): Promise<[boolean, string | undefined]> {
@@ -57,7 +68,7 @@ export async function checkMinerDeployed(mid: string): Promise<[boolean, string 
     // @ts-ignore
     const { output } = await contract.q.getWorkerInfo({ args: [hexDeploymentId] })
     if (output.isErr || output.asOk.isErr) {
-        console.log(output.toJSON())
+        logger.log('PC.getWorkerInfo:', output.toJSON())
         return [false, '']
     }
     const workerInfo = output.asOk.asOk

@@ -10,7 +10,7 @@ const CONTRACT = <`0x${string}`> process.env.EVM_CONTRACT || '0xFBA3912Ca04dd458
 
 const abi = parseAbi([
     'struct MinerInfo { address owner; uint256 expiration; uint256 state; string uri; }',
-    'function miners(bytes32 minerId) view returns (MinerInfo)',
+    'function miners(bytes32 minerId) view returns (address owner, uint256 expiration, uint256 state, string uri)',
     'function getAllMiners() public view returns (MinerInfo[] memory)',
     'function reportOnline(bytes32 minerId, string uri) external',
     'function reportExpired(bytes32 minerId) external',
@@ -67,11 +67,11 @@ export async function reportOnline(mid: `0x${string}`, uri: string): Promise<voi
 }
 
 export async function checkMinerDeployed(mid: `0x${string}`): Promise<boolean> {
-    const result = await publicClient.readContract({
+    const [_owner, _expiration, state, _uri] = await publicClient.readContract({
         address: CONTRACT,
         abi,
         functionName: 'miners',
         args: [mid]
     })
-    return result.state == 1n
+    return state == 1n
 }

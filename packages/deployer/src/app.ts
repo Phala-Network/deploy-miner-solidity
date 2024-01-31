@@ -38,8 +38,7 @@ const stateMachine: StateMachine = {
                 await EVM.reportOnline(context.mid, context.uri!)
             },
             async check(context: Context) {
-                await EVM.checkMinerDeployed(context.mid)
-                return false
+                return await EVM.checkMinerDeployed(context.mid)
             },
             timeout: 60_000,
         }

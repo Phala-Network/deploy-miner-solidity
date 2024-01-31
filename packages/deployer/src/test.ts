@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import * as db from './db'
 import * as PC from './chain/pc'
+import * as EVM from './chain/evm'
 
 function testDb() {
     let v
@@ -11,6 +12,11 @@ function testDb() {
     console.assert(v == 'ok')
 }
 
+async function testEvm() {
+    const r = await EVM.checkMinerDeployed('0x0000000000000000000000000000000000000000000000000000000000000000')
+    console.log('checkMinerDeployed', r)
+}
+
 async function testPC() {
     await PC.connect()
     const result = await PC.checkMinerDeployed('test-deploy-0')
@@ -19,7 +25,8 @@ async function testPC() {
 
 async function main() {
     // testDb()
-    await testPC()
+    // await testPC()
+    await testEvm()
 }
 
 main()

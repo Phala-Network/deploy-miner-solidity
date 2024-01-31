@@ -82,7 +82,7 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
 
     function reportExpired(bytes32 minerId) external onlyDeployer {
         require(miners[minerId].owner > address(0), "Miner has not been paied");
-        require(block.timestamp > miners[minerId].expiration, "Miner has not expired");
+        require(block.timestamp * 1000 >= miners[minerId].expiration, "Miner has not expired");
 
         miners[minerId].state = MinerState.Expired;
 
@@ -98,7 +98,7 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
     }
 
     function hasExpired(bytes32 minerId) external view returns (bool) {
-        return block.timestamp >= miners[minerId].expiration;
+        return block.timestamp * 1000 >= miners[minerId].expiration;
     }
 
     function minerDeployer() external view returns (address) {
@@ -120,7 +120,8 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
     function calculateExpiration(uint256 amount) internal view returns (uint256) {
         // Price: 5 USDC/Day
         uint256 duration = amount * 24 * 60 * 60 / (5 * 1000000);
-        return block.timestamp + duration;
+        // Covert to ms
+        return (block.timestamp + duration) * 1000;
     }
 
     /**

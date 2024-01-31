@@ -133,6 +133,7 @@ contract MinerStaking is Ownable {
     // Calculate pending reward that depositor current has
     function getReward(bytes32 minerId, address depositor) public view returns (uint256) {
         StakingInfo memory localStakingInfo = stakingInfo[minerId];
+        if (depositorList[minerId].length == 0) return 0;
 
         uint256 totalNonSavedReward = localStakingInfo.reward * (block.number - localStakingInfo.lastUpdateBlock);
         // Saved pending reward + non-saved pending reward

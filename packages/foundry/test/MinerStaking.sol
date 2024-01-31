@@ -76,8 +76,20 @@ contract MinerStakingTest is Test {
         vm.prank(address(minerOwner));
         bytes32 minerId = minerManagement.payForMining(5000000);
         require(minerManagement.hasPaied(minerId), "Miner should be paied");
-        require(minerManagement.isActived(minerId), "Miner should be actived");
         require(!minerManagement.hasExpired(minerId), "Miner should not expired");
+
+        // Should failed if worker hasn't online
+        vm.expectRevert("Worker has not online");
+        vm.prank(address(minerOwner));
+        minerStaking.createStaking(
+            minerId,
+            stakingInfo,
+            10000000000000000000000
+        );
+
+        vm.prank(address(deployer));
+        minerManagement.reportOnline(minerId);
+        require(minerManagement.isActived(minerId), "Miner should be actived");
 
         // Create staking should work
         vm.prank(address(minerOwner));

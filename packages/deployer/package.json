@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/app.ts",
-    "test": "ts-node src/test.ts"
+    "demo": "ts-node src/encDemo.ts",
+    "test": "ts-node src/test.ts",
+    "check": "tsc --noEmit"
   },
   "author": "",
   "license": "ISC",

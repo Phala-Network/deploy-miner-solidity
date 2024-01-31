@@ -7,8 +7,10 @@ import * as PC from './chain/pc'
 import * as EVM from './chain/evm'
 
 type Context = {
+    owner: `0x${string}`,
     mid: `0x${string}`,
     expiration: number,
+    uri?: string,
 }
 
 const stateMachine: StateMachine = {
@@ -18,18 +20,22 @@ const stateMachine: StateMachine = {
             to: 'Deployed',
             async action(context: Context) {
                 logger.log('PC.deploy()...')
-                await PC.deploy(context.mid, context.expiration)
+                await PC.deploy(context.owner, context.mid, context.expiration)
             },
             async check(context: Context) {
                 logger.log(`PC.getDeployment(${context.mid})...`)
-                return await PC.checkMinerDeployed(context.mid)
+                const [result, uri] = await PC.checkMinerDeployed(context.mid)
+                if (result) {
+                    context.uri = uri
+                }
+                return result
             },
             timeout: 20_000,
         },
         Deployed: {
             to: 'Reported',
             async action(context: Context) {
-                await EVM.reportOnline(context.mid)
+                await EVM.reportOnline(context.mid, context.uri!)
             },
             async check(context: Context) {
                 await EVM.checkMinerDeployed(context.mid)
@@ -51,6 +57,7 @@ async function syncNewTasks() {
         if (miner.state == 'Undeployed') {
             if (db.get(taskName(miner.mid)) == undefined) {
                 const context: Context = {
+                    owner: miner.owner,
                     mid: miner.mid,
                     expiration: miner.expiration,
                 }
@@ -76,6 +83,7 @@ async function refreshTasks() {
 }
 
 async function main() {
+    await PC.connect()
     while(true) {
         await syncNewTasks()
         await refreshTasks()

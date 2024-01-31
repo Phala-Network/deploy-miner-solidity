@@ -56,13 +56,18 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
     }
 
     function payForMining(uint256 amount) external returns (bytes32) {
+        require(amount >= 5000000, "Too few to pay");
         // Transfer fee token from buyer to the contract address
         IERC20(feeToken).safeTransferFrom(msg.sender, address(this), amount);
 
         // Save miner information
         bytes32 minerId = bytes32(totalMiners++);
-        miners[minerId] =
-            MinerInfo({owner: msg.sender, expiration: calculateExpiration(amount), state: MinerState.Undeployed, uri: ""});
+        miners[minerId] = MinerInfo({
+            owner: msg.sender,
+            expiration: calculateExpiration(amount),
+            state: MinerState.Undeployed,
+            uri: ""
+        });
         console.logString("Buy worker successfully");
         return minerId;
     }
@@ -93,7 +98,7 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
     }
 
     function hasExpired(bytes32 minerId) external view returns (bool) {
-        return (block.timestamp * 1000) > miners[minerId].expiration;
+        return block.timestamp >= miners[minerId].expiration;
     }
 
     function minerDeployer() external view returns (address) {
@@ -114,7 +119,7 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
 
     function calculateExpiration(uint256 amount) internal view returns (uint256) {
         // Price: 5 USDC/Day
-        uint256 duration = amount * 24 * 60 * 60 * 1000 / (5 * 1000000);
+        uint256 duration = amount * 24 * 60 * 60 / (5 * 1000000);
         return block.timestamp + duration;
     }
 

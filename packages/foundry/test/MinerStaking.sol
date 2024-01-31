@@ -81,11 +81,7 @@ contract MinerStakingTest is Test {
         // Should failed if worker hasn't online
         vm.expectRevert("Worker has not online");
         vm.prank(address(minerOwner));
-        minerStaking.createStaking(
-            minerId,
-            stakingInfo,
-            10000000000000000000000
-        );
+        minerStaking.createStaking(minerId, stakingInfo, 10000000000000000000000);
 
         vm.prank(address(deployer));
         minerManagement.reportOnline(minerId, "phala://0xAAAAA");

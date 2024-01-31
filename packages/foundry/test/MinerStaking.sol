@@ -88,7 +88,7 @@ contract MinerStakingTest is Test {
         );
 
         vm.prank(address(deployer));
-        minerManagement.reportOnline(minerId);
+        minerManagement.reportOnline(minerId, "phala://0xAAAAA");
         require(minerManagement.isActived(minerId), "Miner should be actived");
 
         // Create staking should work

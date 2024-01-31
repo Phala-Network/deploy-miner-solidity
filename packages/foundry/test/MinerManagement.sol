@@ -40,7 +40,7 @@ contract MinerManagementTest is Test {
         require(minerManagement.hasPaied(minerId), "Miner should be paied");
 
         vm.prank(address(DEFAULT_SENDER));
-        minerManagement.reportOnline(minerId);
+        minerManagement.reportOnline(minerId, "phala://0xAAAAA");
         require(minerManagement.isActived(minerId), "Miner should be actived");
         require(!minerManagement.hasExpired(minerId), "Miner should not expired");
 

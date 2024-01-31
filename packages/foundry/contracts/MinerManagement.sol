@@ -27,6 +27,7 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
         // Expire timestamp in milliseconds
         uint256 expiration;
         MinerState state;
+        string uri;
     }
 
     enum MinerState {
@@ -61,15 +62,16 @@ contract MinerManagement is Ownable, IMinerManagementInspect {
         // Save miner information
         bytes32 minerId = bytes32(totalMiners++);
         miners[minerId] =
-            MinerInfo({owner: msg.sender, expiration: calculateExpiration(amount), state: MinerState.Undeployed});
+            MinerInfo({owner: msg.sender, expiration: calculateExpiration(amount), state: MinerState.Undeployed, uri: ""});
         console.logString("Buy worker successfully");
         return minerId;
     }
 
-    function reportOnline(bytes32 minerId) external onlyDeployer {
+    function reportOnline(bytes32 minerId, string memory uri) external onlyDeployer {
         require(miners[minerId].owner > address(0), "Miner has not been paied");
 
         miners[minerId].state = MinerState.Active;
+        miners[minerId].uri = uri;
         console.logString("Miner online");
     }
 

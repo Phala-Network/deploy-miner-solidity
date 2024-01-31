@@ -1297,17 +1297,7 @@ const deployedContracts = {
         {
           inputs: [
             {
-              internalType: "bytes32",
-              name: "minerId",
-              type: "bytes32",
-            },
-            {
               components: [
-                {
-                  internalType: "address",
-                  name: "owner",
-                  type: "address",
-                },
                 {
                   internalType: "address",
                   name: "stakingToken",
@@ -1326,11 +1316,6 @@ const deployedContracts = {
                 {
                   internalType: "uint256",
                   name: "reward",
-                  type: "uint256",
-                },
-                {
-                  internalType: "uint256",
-                  name: "lastUpdateBlock",
                   type: "uint256",
                 },
               ],
@@ -1369,11 +1354,6 @@ const deployedContracts = {
               name: "",
               type: "bytes32",
             },
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
           ],
           name: "depositRecord",
           outputs: [
@@ -1394,12 +1374,12 @@ const deployedContracts = {
               type: "bytes32",
             },
           ],
-          name: "getDepositors",
+          name: "getReward",
           outputs: [
             {
-              internalType: "address[]",
+              internalType: "uint256",
               name: "",
-              type: "address[]",
+              type: "uint256",
             },
           ],
           stateMutability: "view",
@@ -1409,16 +1389,11 @@ const deployedContracts = {
           inputs: [
             {
               internalType: "bytes32",
-              name: "minerId",
+              name: "",
               type: "bytes32",
             },
-            {
-              internalType: "address",
-              name: "depositor",
-              type: "address",
-            },
           ],
-          name: "getReward",
+          name: "lastUpdatedBlock",
           outputs: [
             {
               internalType: "uint256",
@@ -1462,11 +1437,6 @@ const deployedContracts = {
               name: "",
               type: "bytes32",
             },
-            {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
           ],
           name: "pendingReward",
           outputs: [
@@ -1487,13 +1457,7 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
+          inputs: [],
           name: "rewardBalance",
           outputs: [
             {
@@ -1506,43 +1470,12 @@ const deployedContracts = {
           type: "function",
         },
         {
-          inputs: [
-            {
-              internalType: "bytes32",
-              name: "",
-              type: "bytes32",
-            },
-          ],
-          name: "stakingInfo",
+          inputs: [],
+          name: "totalMiners",
           outputs: [
             {
-              internalType: "address",
-              name: "owner",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "stakingToken",
-              type: "address",
-            },
-            {
               internalType: "uint256",
-              name: "ticket",
-              type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "rewardToken",
-              type: "address",
-            },
-            {
-              internalType: "uint256",
-              name: "reward",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "lastUpdateBlock",
+              name: "",
               type: "uint256",
             },
           ],

@@ -18,20 +18,28 @@ contract DeployScript is ScaffoldETHDeploy {
         }
         vm.startBroadcast(deployerPrivateKey);
         ERC20 usdc = new ERC20("USD Coin", "USDC", 6);
-        console.logString(string.concat("USDC (USD Coin) deployed at: ", vm.toString(address(usdc))));
+        console.log("USDC (USD Coin) deployed at: %s", address(usdc));
         usdc.mint(vm.addr(deployerPrivateKey), 1000000000);
-        console.logString(string.concat("Mint 1000000000 USDC to addr: ", vm.toString(vm.addr(deployerPrivateKey))));
+        console.log("Mint 1000000000 USDC to addr: %s", vm.addr(deployerPrivateKey));
         ERC20 testToken = new ERC20("Test Token", "TT", 18);
-        console.logString(string.concat("TT (Test Token) deployed at: ", vm.toString(address(testToken))));
-        testToken.mint(vm.addr(deployerPrivateKey), 10000000000000000000000);
-        console.logString(
-            string.concat("Mint 10000000000000000000000 TT to addr: ", vm.toString(vm.addr(deployerPrivateKey)))
-        );
+        console.log("TT (Test Token) deployed at: %s", address(testToken));
+        testToken.mint(vm.addr(deployerPrivateKey), 10000 ether);
+        console.log("Mint 10000000000000000000000 TT to addr: %s", vm.addr(deployerPrivateKey));
 
         MinerManagement minerManagement = new MinerManagement(vm.addr(deployerPrivateKey), address(usdc));
-        console.logString(string.concat("MinerManagement deployed at: ", vm.toString(address(minerManagement))));
+        console.log("MinerManagement deployed at: %s", address(minerManagement));
         MinerStaking minerStaking = new MinerStaking(address(minerManagement));
-        console.logString(string.concat("MinerStaking deployed at: ", vm.toString(address(minerStaking))));
+        console.log("MinerStaking deployed at: %s", address(minerStaking));
+        testToken.approve(address(minerStaking), 10000 ether);
+        minerStaking.createStaking(
+            MinerStaking.StakingInfo({
+                stakingToken: address(testToken),
+                ticket: 1 ether,
+                rewardToken: address(testToken),
+                reward: 10 ether
+            }),
+            10000 ether
+        );
         vm.stopBroadcast();
 
         deployments.push(ScaffoldETHDeploy.Deployment({name: "USDC", addr: address(usdc)}));

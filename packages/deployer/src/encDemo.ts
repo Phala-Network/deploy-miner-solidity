@@ -19,16 +19,20 @@ async function main() {
 
     const text = 'email contents'
 
+    logger.log('------------')
+    logger.log('Sender side:')
     let senderKey = await PC.senderGetKey(mid, sender_sk, receiver_pk, nonce)
     const iv = new Uint8Array(16);
     const cipher = crypto.createCipheriv('aes-256-cbc', senderKey, iv);
     const encrypted = cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
+    logger.log('Encrypted:', encrypted)
 
+    logger.log('------------')
+    logger.log('Receiver side:')
     let receiverKey = await PC.receiverGetKey(mid, receiver_sk, sender_pk, nonce)
     const decipher = crypto.createDecipheriv('aes-256-cbc', receiverKey, iv);
     const decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
-
-    logger.log(`decrypted mail: "${decrypted}"`)
+    logger.log('Decrypted:', decrypted)
 }
 
 main()

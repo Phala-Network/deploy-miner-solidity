@@ -107,10 +107,10 @@ export async function senderGetKey(mid: string, sender_sk: `0x${string}`, receiv
     const { output } = await worker.q.senderGetKey({ args: [nonce, receiver_pk] })
     // @ts-ignore
     if (output.isErr || output.asOk.isErr) {
-        console.log(output.toJSON())
+        logger.log(output.toJSON())
         return
     }
-    console.log(output.toJSON())
+    logger.log(output.toJSON())
     // @ts-ignore
     return output.asOk.asOk
 }
@@ -121,10 +121,10 @@ export async function receiverGetKey(mid: string, receiver_sk: `0x${string}`, se
     const { output } = await worker.q.receiverGetKey({ args: [nonce, sender_pk] })
     // @ts-ignore
     if (output.isErr || output.asOk.isErr) {
-        console.log(output.toJSON())
+        logger.log(output.toJSON())
         return
     }
-    console.log(output.toJSON())
+    logger.log(output.toJSON())
     // @ts-ignore
     return output.asOk.asOk
 }

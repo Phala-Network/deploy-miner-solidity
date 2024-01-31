@@ -19,8 +19,6 @@ contract MinerStaking is Ownable {
     uint256 MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
     struct StakingInfo {
-        // Owner of the miner, e.g. owner of the staking event
-        address owner;
         // The staking token
         address stakingToken;
         // The amount of staking token for each staker
@@ -29,16 +27,15 @@ contract MinerStaking is Ownable {
         address rewardToken;
         // The amount of reward per block
         uint256 reward;
-        // Last update block number
-        uint256 lastUpdateBlock;
     }
 
     address private minerManagement;
-    mapping(bytes32 => StakingInfo) public stakingInfo;
-    mapping(bytes32 => mapping(address => bool)) public depositRecord;
-    mapping(bytes32 => address[]) depositorList;
-    mapping(bytes32 => mapping(address => uint256)) public pendingReward;
-    mapping(bytes32 => uint256) public rewardBalance;
+    StakingInfo stakingInfo;
+    uint256 public rewardBalance;
+    uint256 public totalMiners;
+    mapping(bytes32 => bool) public depositRecord;
+    mapping(bytes32 => uint256) public lastUpdatedBlock;
+    mapping(bytes32 => uint256) public pendingReward;
 
     modifier onlyMinerDeployer() {
         require(_msgSender() == IMinerManagementInspect(minerManagement).minerDeployer(), "Not deployer");
@@ -57,61 +54,52 @@ contract MinerStaking is Ownable {
      */
     constructor(address _minerManagement) Ownable(msg.sender) {
         minerManagement = _minerManagement;
+        totalMiners = 0;
     }
 
     // Miner owner create staking and topup reward token
-    function createStaking(bytes32 minerId, StakingInfo memory info, uint256 topupAmount)
+    function createStaking(StakingInfo memory info, uint256 topupAmount)
         external
-        onlyMinerOwner(minerId)
+        onlyOwner
     {
-        require(IMinerManagementInspect(minerManagement).hasPaied(minerId), "Buy worker first");
-        require(IMinerManagementInspect(minerManagement).isActived(minerId), "Worker has not online");
-        require(info.owner == msg.sender, "Miner mismatch");
-
         // Transfer reward token to this contract
         IERC20(info.rewardToken).safeTransferFrom(msg.sender, address(this), topupAmount);
-        rewardBalance[minerId] = topupAmount;
-
-        info.lastUpdateBlock = block.number;
-        stakingInfo[minerId] = info;
+        rewardBalance = topupAmount;
+        stakingInfo = info;
     }
 
     // Miner deployer pause staking when miner offline
     function pauseStaking(bytes32 minerId) external onlyMinerDeployer {
         _update(minerId);
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
-        localStakingInfo.lastUpdateBlock = MAX_UINT256;
-        stakingInfo[minerId] = localStakingInfo;
+        lastUpdatedBlock[minerId] = MAX_UINT256;
     }
 
     // Miner deployer unpause staking when miner back to online
     function unpauseStaking(bytes32 minerId) external onlyMinerDeployer {
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
-        localStakingInfo.lastUpdateBlock = block.number;
-        stakingInfo[minerId] = localStakingInfo;
+        lastUpdatedBlock[minerId] = block.number;
     }
 
     // User deposit fund
-    function deposit(bytes32 minerId) external {
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
-        require(block.number >= localStakingInfo.lastUpdateBlock, "Can not deposit");
-        require(!depositRecord[minerId][msg.sender], "Already deposited");
+    function deposit(bytes32 minerId) external onlyMinerOwner(minerId) {
+        require(IMinerManagementInspect(minerManagement).hasPaied(minerId), "Buy worker first");
+        require(IMinerManagementInspect(minerManagement).isActived(minerId), "Worker has not online");
+
+        StakingInfo memory localStakingInfo = stakingInfo;
+        require(block.number >= lastUpdatedBlock[minerId], "Can not deposit");
+        require(!depositRecord[minerId], "Already deposited");
 
         _update(minerId);
 
         IERC20(localStakingInfo.stakingToken).safeTransferFrom(msg.sender, address(this), localStakingInfo.ticket);
-        depositRecord[minerId][msg.sender] = true;
-
-        // Update staking info
-        address[] storage localDepositorList = depositorList[minerId];
-        localDepositorList.push(msg.sender);
-        depositorList[minerId] = localDepositorList;
+        depositRecord[minerId] = true;
+        ++totalMiners;
+        lastUpdatedBlock[minerId] = block.number;
     }
 
     // User withdraw fund
     function withdraw(bytes32 minerId) external {
-        require(depositRecord[minerId][msg.sender], "Has not stake to this miner");
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
+        require(depositRecord[minerId], "Has not stake to this miner");
+        StakingInfo memory localStakingInfo = stakingInfo;
 
         // Refund tiket
         IERC20(localStakingInfo.stakingToken).safeTransfer(msg.sender, localStakingInfo.ticket);
@@ -119,44 +107,39 @@ contract MinerStaking is Ownable {
         _update(minerId);
 
         // Distribute reward belong to this staker
-        uint256 reward = pendingReward[minerId][msg.sender];
-        require(rewardBalance[minerId] > reward, "Insufficient reward");
+        uint256 reward = pendingReward[minerId];
+        require(rewardBalance > reward, "Insufficient reward");
         IERC20(localStakingInfo.rewardToken).safeTransfer(msg.sender, reward);
 
         // Update reward info
-        pendingReward[minerId][msg.sender] = 0;
-        rewardBalance[minerId] -= reward;
+        pendingReward[minerId] = 0;
+        rewardBalance -= reward;
 
-        // TODO: remove from depositor list
+        depositRecord[minerId] = false;
+        --totalMiners;
+        lastUpdatedBlock[minerId] = block.number;
     }
 
-    // Calculate pending reward that depositor current has
-    function getReward(bytes32 minerId, address depositor) public view returns (uint256) {
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
-        if (depositorList[minerId].length == 0) return 0;
-
-        uint256 totalNonSavedReward = localStakingInfo.reward * (block.number - localStakingInfo.lastUpdateBlock);
+    // Calculate pending reward that miner currently has
+    function getReward(bytes32 minerId) public view returns (uint256) {
+        if (!depositRecord[minerId] || lastUpdatedBlock[minerId] > block.number) {
+            return 0;
+        }
+        uint256 totalNonSavedReward = stakingInfo.reward * (block.number - lastUpdatedBlock[minerId]);
         // Saved pending reward + non-saved pending reward
-        return pendingReward[minerId][depositor] + (totalNonSavedReward / depositorList[minerId].length);
-    }
-
-    function getDepositors(bytes32 minerId) public view returns (address[] memory) {
-        return depositorList[minerId];
+        return pendingReward[minerId] + (totalNonSavedReward / totalMiners);
     }
 
     // Update reward, use for look for demo purpose only
     function _update(bytes32 minerId) internal {
-        StakingInfo memory localStakingInfo = stakingInfo[minerId];
-        if (depositorList[minerId].length == 0 || block.number <= localStakingInfo.lastUpdateBlock) {
+        uint256 lastBlock = lastUpdatedBlock[minerId];
+        if (!depositRecord[minerId] || block.number <= lastBlock) {
             return;
         }
 
-        uint256 totalReward = localStakingInfo.reward * (block.number - localStakingInfo.lastUpdateBlock);
-        for (uint256 i = 0; i < depositorList[minerId].length; i++) {
-            pendingReward[minerId][depositorList[minerId][i]] += totalReward / depositorList[minerId].length;
-        }
-        localStakingInfo.lastUpdateBlock = block.number;
-        stakingInfo[minerId] = localStakingInfo;
+        uint256 totalReward = stakingInfo.reward * (block.number - lastBlock);
+        pendingReward[minerId] += totalReward / totalMiners;  // approximate
+        lastUpdatedBlock[minerId] = block.number;
     }
 
     /**

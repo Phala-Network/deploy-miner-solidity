@@ -4,7 +4,7 @@ import fs from 'fs'
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { stringToU8a, u8aToHex, u8aConcat, hexToU8a } from '@polkadot/util'
 import { Keyring } from '@polkadot/keyring'
-import { cryptoWaitReady } from '@polkadot/util-crypto'
+import { cryptoWaitReady, keccakAsHex } from '@polkadot/util-crypto'
 import { OnChainRegistry, getClient, getContract, KeyringPairProvider, AbiLike, PinkContractPromise } from '@phala/sdk'
 import { stringToHex } from "viem";
 
@@ -101,7 +101,7 @@ async function connectDmailWorker(caller: `0x${string}`, mid: string): Promise<P
     })
 }
 
-export async function getKey(workerAddress: `0x${string}`, metadata: object, sig: `0x${string}`): Promise<Uint8Array> {
+export async function connectWorkerWithAddress(workerAddress: `0x${string}`): Promise<PinkContractPromise> {
     const keyring = new Keyring({ type: 'sr25519', ss58Format: 30 });
     const key = keyring.addFromMnemonic('//Alice');
     const provider = await KeyringPairProvider.create(api, key)
@@ -111,8 +111,11 @@ export async function getKey(workerAddress: `0x${string}`, metadata: object, sig
         contractId: workerAddress,
         abi: readAbi('./src/chain/dmailWorker.json'),
         provider,
-    })
+    });
+    return worker;
+}
 
+export async function getKey(worker: PinkContractPromise, metadata: object, sig: `0x${string}`): Promise<Uint8Array> {
     const { output } = await worker.q.getKey({ args: [metadata, sig] })
 
     // @ts-ignore
@@ -123,4 +126,8 @@ export async function getKey(workerAddress: `0x${string}`, metadata: object, sig
     logger.log(output.toJSON())
     // @ts-ignore
     return output.asOk.asOk
+}
+
+export function keccak256(input: string): string {
+    return keccakAsHex(input)
 }

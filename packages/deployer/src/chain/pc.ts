@@ -101,24 +101,20 @@ async function connectDmailWorker(caller: `0x${string}`, mid: string): Promise<P
     })
 }
 
-export async function senderGetKey(mid: string, sender_sk: `0x${string}`, receiver_pk: `0x${string}`, nonce: number): Promise<Uint8Array> {
-    const worker = await connectDmailWorker(sender_sk, mid)
+export async function getKey(workerAddress: `0x${string}`, metadata: object, sig: `0x${string}`): Promise<Uint8Array> {
+    const keyring = new Keyring({ type: 'sr25519', ss58Format: 30 });
+    const key = keyring.addFromMnemonic('//Alice');
+    const provider = await KeyringPairProvider.create(api, key)
 
-    const { output } = await worker.q.senderGetKey({ args: [nonce, receiver_pk] })
-    // @ts-ignore
-    if (output.isErr || output.asOk.isErr) {
-        logger.log(output.toJSON())
-        return
-    }
-    logger.log(output.toJSON())
-    // @ts-ignore
-    return output.asOk.asOk
-}
+    const worker = await getContract({
+        client,
+        contractId: workerAddress,
+        abi: readAbi('./src/chain/dmailWorker.json'),
+        provider,
+    })
 
-export async function receiverGetKey(mid: string, receiver_sk: `0x${string}`, sender_pk: `0x${string}`, nonce: number): Promise<Uint8Array> {
-    const worker = await connectDmailWorker(receiver_sk, mid)
+    const { output } = await worker.q.getKey({ args: [metadata, sig] })
 
-    const { output } = await worker.q.receiverGetKey({ args: [nonce, sender_pk] })
     // @ts-ignore
     if (output.isErr || output.asOk.isErr) {
         logger.log(output.toJSON())

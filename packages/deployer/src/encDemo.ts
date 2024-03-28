@@ -10,18 +10,31 @@ async function main() {
     // const [result, uri] = await PC.checkMinerDeployed('deployment-id-1')
     // await PC.deploy('0xABCDABCD', 'deployment-id-123', Date.now() + 3600_000)
 
-    const sender_sk = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80'
-    const sender_pk = '0x384de7d40bbac77b5c98bef672d9cb1ac06759b03666386faa9cc301f1ad0d74'
-    const receiver_sk = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff81'
-    const receiver_pk = '0x70f0a3059bd820eefb2df892d9ac16272ce7ab3fba5a742b24844ac0723c7006'
-    const nonce = 0
-    const mid = 'test-deploy-0'
+    const workerAddress = '0x994ad7c0de8bac6c89813a9f0827ba0618b077c479af3fb34ae3d1b1b6906d70';
+    // Email metadata.
+    // Everyone including sender and all the receivers can get the key from the DePIN worker.
+    const metadata = {
+        sender: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
+        receivers: [
+            '0x70997970C51812dc3A010C7d01b50e0d17dc79C8'
+        ],
+        nonce: '1234',
+    }
+    /*
+        // private key, or injected browser wallet
+        const wallet = new Wallet('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80');
+        // keccak256(api.createType('MailMetadata', metadata).toHex())
+        const hash = ethers.getBytes('0xc840c81b117f6007d5c1ea4383351650b353b67a785b634bc76dfc0c1da18ea1');
+        const sig = wallet.signMessageSync(hash);
+    */
+    const sigSender = '0xacdfa30b99b862dc232e520259daebf16abe647c60932aea222e9de772f1d69f1263108990f1a1ec030482c12bc0e509f1aaec8dce06e69382f575e6a626b29c1c';
+    const sigReceiver = '0x529d3bc68478045e367c75168ec0135b165ee32de3c01931cb109759bb8abe8a73618425ce7cf4c355d64a745a63b9b072f01bba6472f5a5458281780a7f515a1b';
 
     const text = 'email contents'
 
     logger.log('------------')
     logger.log('Sender side:')
-    let senderKey = await PC.senderGetKey(mid, sender_sk, receiver_pk, nonce)
+    let senderKey = await PC.getKey(workerAddress, metadata, sigSender)
     const iv = new Uint8Array(16);
     const cipher = crypto.createCipheriv('aes-256-cbc', senderKey, iv);
     const encrypted = cipher.update(text, 'utf8', 'hex') + cipher.final('hex');
@@ -29,7 +42,7 @@ async function main() {
 
     logger.log('------------')
     logger.log('Receiver side:')
-    let receiverKey = await PC.receiverGetKey(mid, receiver_sk, sender_pk, nonce)
+    let receiverKey = await PC.getKey(workerAddress, metadata, sigReceiver)
     const decipher = crypto.createDecipheriv('aes-256-cbc', receiverKey, iv);
     const decrypted = decipher.update(encrypted, 'hex', 'utf8') + decipher.final('utf8');
     logger.log('Decrypted:', decrypted)
